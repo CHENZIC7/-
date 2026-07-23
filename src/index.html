@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园微农园智能监测系统</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>🌱 校园微农园智能监测系统</h1>
+            <p class="subtitle">基于AIoT的智能农业监测平台</p>
+        </div>
+        <div class="header-info">
+            <span id="currentTime"></span>
+            <span class="status-badge online">系统在线</span>
+            <div class="user-panel">
+                <span class="user-icon">👤</span>
+                <span id="userName">管理员</span>
+                <button class="logout-btn" onclick="logout()" title="退出登录">退出</button>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" data-section="dashboard">📊 数据仪表盘</button>
+        <button class="nav-btn" data-section="charts">📈 历史趋势</button>
+        <button class="nav-btn" data-section="devices">🔧 设备管理</button>
+        <button class="nav-btn" data-section="alerts">⚠️ 预警中心</button>
+        <button class="nav-btn" data-section="control">🎮 控制面板</button>
+    </nav>
+
+    <main>
+        <!-- 数据仪表盘 -->
+        <section id="dashboard" class="section active">
+            <div class="dashboard-grid">
+                <div class="sensor-card temperature">
+                    <div class="card-header">
+                        <span class="sensor-icon">🌡️</span>
+                        <h3>空气温度</h3>
+                    </div>
+                    <div class="sensor-value" id="temperature">--</div>
+                    <div class="sensor-unit">°C</div>
+                    <div class="sensor-range">适宜范围: 18-28°C</div>
+                </div>
+
+                <div class="sensor-card humidity">
+                    <div class="card-header">
+                        <span class="sensor-icon">💧</span>
+                        <h3>空气湿度</h3>
+                    </div>
+                    <div class="sensor-value" id="humidity">--</div>
+                    <div class="sensor-unit">%</div>
+                    <div class="sensor-range">适宜范围: 40-70%</div>
+                </div>
+
+                <div class="sensor-card soil-moisture">
+                    <div class="card-header">
+                        <span class="sensor-icon">🌾</span>
+                        <h3>土壤湿度</h3>
+                    </div>
+                    <div class="sensor-value" id="soilMoisture">--</div>
+                    <div class="sensor-unit">%</div>
+                    <div class="sensor-range">适宜范围: 50-80%</div>
+                </div>
+
+                <div class="sensor-card light">
+                    <div class="card-header">
+                        <span class="sensor-icon">☀️</span>
+                        <h3>光照强度</h3>
+                    </div>
+                    <div class="sensor-value" id="lightIntensity">--</div>
+                    <div class="sensor-unit">lux</div>
+                    <div class="sensor-range">适宜范围: 1000-5000 lux</div>
+                </div>
+
+                <div class="sensor-card ph">
+                    <div class="card-header">
+                        <span class="sensor-icon">⚗️</span>
+                        <h3>土壤pH值</h3>
+                    </div>
+                    <div class="sensor-value" id="soilPH">--</div>
+                    <div class="sensor-unit">pH</div>
+                    <div class="sensor-range">适宜范围: 6.0-7.0</div>
+                </div>
+
+                <div class="sensor-card co2">
+                    <div class="card-header">
+                        <span class="sensor-icon">💨</span>
+                        <h3>CO₂浓度</h3>
+                    </div>
+                    <div class="sensor-value" id="co2Concentration">--</div>
+                    <div class="sensor-unit">ppm</div>
+                    <div class="sensor-range">适宜范围: 400-1000 ppm</div>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot active"></span>
+                    <span>传感器节点: 5个在线</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot active"></span>
+                    <span>网关状态: 正常</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot active"></span>
+                    <span>数据更新: <span id="updateTime">--</span></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 历史趋势 -->
+        <section id="charts" class="section">
+            <div class="charts-container">
+                <div class="chart-box">
+                    <h3>温湿度24小时趋势</h3>
+                    <canvas id="tempHumidityChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>土壤湿度与光照变化</h3>
+                    <canvas id="soilLightChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>CO₂浓度变化</h3>
+                    <canvas id="co2Chart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>pH值监测</h3>
+                    <canvas id="phChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 设备管理 -->
+        <section id="devices" class="section">
+            <div class="devices-grid">
+                <div class="device-card">
+                    <div class="device-header">
+                        <span class="device-icon">📡</span>
+                        <h3>温湿度传感器节点</h3>
+                        <span class="device-status online">在线</span>
+                    </div>
+                    <div class="device-info">
+                        <p><strong>型号:</strong> DHT22</p>
+                        <p><strong>通信方式:</strong> WiFi (ESP32)</p>
+                        <p><strong>采集频率:</strong> 每30秒</p>
+                        <p><strong>信号强度:</strong> -45 dBm</p>
+                        <p><strong>电池电量:</strong> 85%</p>
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <span class="device-icon">📡</span>
+                        <h3>土壤湿度传感器节点</h3>
+                        <span class="device-status online">在线</span>
+                    </div>
+                    <div class="device-info">
+                        <p><strong>型号:</strong> 电容式土壤湿度传感器</p>
+                        <p><strong>通信方式:</strong> LoRa</p>
+                        <p><strong>采集频率:</strong> 每1分钟</p>
+                        <p><strong>信号强度:</strong> -62 dBm</p>
+                        <p><strong>电池电量:</strong> 92%</p>
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <span class="device-icon">📡</span>
+                        <h3>光照强度传感器节点</h3>
+                        <span class="device-status online">在线</span>
+                    </div>
+                    <div class="device-info">
+                        <p><strong>型号:</strong> BH1750</p>
+                        <p><strong>通信方式:</strong> WiFi (ESP8266)</p>
+                        <p><strong>采集频率:</strong> 每15秒</p>
+                        <p><strong>信号强度:</strong> -52 dBm</p>
+                        <p><strong>电池电量:</strong> 78%</p>
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <span class="device-icon">📡</span>
+                        <h3>土壤pH传感器节点</h3>
+                        <span class="device-status warning">信号弱</span>
+                    </div>
+                    <div class="device-info">
+                        <p><strong>型号:</strong> 模拟pH传感器</p>
+                        <p><strong>通信方式:</strong> ZigBee</p>
+                        <p><strong>采集频率:</strong> 每2分钟</p>
+                        <p><strong>信号强度:</strong> -78 dBm</p>
+                        <p><strong>电池电量:</strong> 45%</p>
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <span class="device-icon">📡</span>
+                        <h3>CO₂浓度传感器节点</h3>
+                        <span class="device-status online">在线</span>
+                    </div>
+                    <div class="device-info">
+                        <p><strong>型号:</strong> MH-Z19B</p>
+                        <p><strong>通信方式:</strong> WiFi (ESP32)</p>
+                        <p><strong>采集频率:</strong> 每45秒</p>
+                        <p><strong>信号强度:</strong> -48 dBm</p>
+                        <p><strong>电池电量:</strong> 67%</p>
+                    </div>
+                </div>
+
+                <div class="device-card gateway">
+                    <div class="device-header">
+                        <span class="device-icon">🖧</span>
+                        <h3>网关设备</h3>
+                        <span class="device-status online">运行中</span>
+                    </div>
+                    <div class="device-info">
+                        <p><strong>型号:</strong> 树莓派4B</p>
+                        <p><strong>功能:</strong> 数据汇聚与转发</p>
+                        <p><strong>连接设备:</strong> 5个</p>
+                        <p><strong>CPU使用率:</strong> 23%</p>
+                        <p><strong>内存使用:</strong> 45%</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 预警中心 -->
+        <section id="alerts" class="section">
+            <div class="alerts-container">
+                <div class="alert-card warning">
+                    <div class="alert-header">
+                        <span class="alert-icon">⚠️</span>
+                        <h3>预警通知</h3>
+                        <span class="alert-time">10分钟前</span>
+                    </div>
+                    <div class="alert-content">
+                        <p><strong>土壤湿度偏低</strong></p>
+                        <p>当前土壤湿度为35%，低于适宜范围(50-80%)，建议启动灌溉系统。</p>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn-primary">查看详情</button>
+                        <button class="btn-secondary">确认处理</button>
+                    </div>
+                </div>
+
+                <div class="alert-card info">
+                    <div class="alert-header">
+                        <span class="alert-icon">ℹ️</span>
+                        <h3>系统通知</h3>
+                        <span class="alert-time">30分钟前</span>
+                    </div>
+                    <div class="alert-content">
+                        <p><strong>pH传感器电量低</strong></p>
+                        <p>土壤pH传感器节点电池电量低于50%，建议及时更换电池或充电。</p>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn-primary">查看详情</button>
+                        <button class="btn-secondary">确认处理</button>
+                    </div>
+                </div>
+
+                <div class="alert-card success">
+                    <div class="alert-header">
+                        <span class="alert-icon">✅</span>
+                        <h3>操作记录</h3>
+                        <span class="alert-time">1小时前</span>
+                    </div>
+                    <div class="alert-content">
+                        <p><strong>灌溉任务完成</strong></p>
+                        <p>自动灌溉系统已运行15分钟，土壤湿度从32%提升至65%。</p>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn-primary">查看详情</button>
+                    </div>
+                </div>
+
+                <div class="alert-card warning">
+                    <div class="alert-header">
+                        <span class="alert-icon">⚠️</span>
+                        <h3>预警通知</h3>
+                        <span class="alert-time">2小时前</span>
+                    </div>
+                    <div class="alert-content">
+                        <p><strong>温度过高预警</strong></p>
+                        <p>当前环境温度达到32°C，超过适宜范围(18-28°C)，建议开启遮阳设备。</p>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn-primary">查看详情</button>
+                        <button class="btn-secondary">确认处理</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 控制面板 -->
+        <section id="control" class="section">
+            <div class="control-grid">
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-icon">🚿</span>
+                        <h3>灌溉系统</h3>
+                    </div>
+                    <div class="control-status">
+                        <span class="status-indicator off" id="irrigationStatus">关闭</span>
+                    </div>
+                    <div class="control-actions">
+                        <button class="control-btn on" onclick="toggleDevice('irrigation', true)">开启</button>
+                        <button class="control-btn off" onclick="toggleDevice('irrigation', false)">关闭</button>
+                    </div>
+                    <div class="control-schedule">
+                        <label>定时设置:</label>
+                        <input type="time" value="06:00" class="time-input">
+                        <span>至</span>
+                        <input type="time" value="08:00" class="time-input">
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-icon">☀️</span>
+                        <h3>遮阳系统</h3>
+                    </div>
+                    <div class="control-status">
+                        <span class="status-indicator off" id="shadeStatus">关闭</span>
+                    </div>
+                    <div class="control-actions">
+                        <button class="control-btn on" onclick="toggleDevice('shade', true)">开启</button>
+                        <button class="control-btn off" onclick="toggleDevice('shade', false)">关闭</button>
+                    </div>
+                    <div class="control-threshold">
+                        <label>光照阈值:</label>
+                        <input type="number" value="5000" class="number-input"> lux
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-icon">💨</span>
+                        <h3>通风系统</h3>
+                    </div>
+                    <div class="control-status">
+                        <span class="status-indicator on" id="ventilationStatus">运行中</span>
+                    </div>
+                    <div class="control-actions">
+                        <button class="control-btn on" onclick="toggleDevice('ventilation', true)">开启</button>
+                        <button class="control-btn off" onclick="toggleDevice('ventilation', false)">关闭</button>
+                    </div>
+                    <div class="control-threshold">
+                        <label>温度阈值:</label>
+                        <input type="number" value="28" class="number-input"> °C
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-icon">💡</span>
+                        <h3>补光系统</h3>
+                    </div>
+                    <div class="control-status">
+                        <span class="status-indicator off" id="lightStatus">关闭</span>
+                    </div>
+                    <div class="control-actions">
+                        <button class="control-btn on" onclick="toggleDevice('light', true)">开启</button>
+                        <button class="control-btn off" onclick="toggleDevice('light', false)">关闭</button>
+                    </div>
+                    <div class="control-schedule">
+                        <label>补光时段:</label>
+                        <input type="time" value="18:00" class="time-input">
+                        <span>至</span>
+                        <input type="time" value="22:00" class="time-input">
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-icon">🤖</span>
+                        <h3>AI智能模式</h3>
+                    </div>
+                    <div class="control-status">
+                        <span class="status-indicator on" id="aiStatus">已启用</span>
+                    </div>
+                    <div class="control-actions">
+                        <button class="control-btn on" onclick="toggleDevice('ai', true)">启用</button>
+                        <button class="control-btn off" onclick="toggleDevice('ai', false)">禁用</button>
+                    </div>
+                    <div class="control-description">
+                        <p>AI模式将根据传感器数据自动调节所有设备</p>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-icon">📱</span>
+                        <h3>远程通知</h3>
+                    </div>
+                    <div class="control-status">
+                        <span class="status-indicator on" id="notificationStatus">已启用</span>
+                    </div>
+                    <div class="control-actions">
+                        <button class="control-btn on" onclick="toggleDevice('notification', true)">启用</button>
+                        <button class="control-btn off" onclick="toggleDevice('notification', false)">禁用</button>
+                    </div>
+                    <div class="control-description">
+                        <p>异常情况时通过微信/短信推送通知</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 校园微农园智能监测系统 - 物联网通讯技术期末作业</p>
+        <p>技术栈: HTML5 + CSS3 + JavaScript + Chart.js</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

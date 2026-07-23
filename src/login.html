@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员登录 - 校园微农园智能监测系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a5f2a 0%, #2d8a4e 50%, #4CAF50 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .login-header .logo {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .login-header h1 {
+            color: #2d8a4e;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper .icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #999;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .remember-forgot label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .remember-forgot input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #4CAF50;
+        }
+
+        .remember-forgot a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        .remember-forgot a:hover {
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4CAF50 0%, #2d8a4e 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        .footer-info {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .footer-info p {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .footer-info .hint {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            color: #666;
+        }
+
+        .footer-info .hint code {
+            background: #e8f5e9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #2d8a4e;
+            font-weight: bold;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .login-btn.loading-state {
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        .login-btn.loading-state .loading {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo">🌱</div>
+            <h1>校园微农园智能监测系统</h1>
+            <p>管理员登录</p>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="error-message" id="errorMessage">
+                <span>⚠️</span>
+                <span id="errorText">用户名或密码错误</span>
+            </div>
+
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <div class="input-wrapper">
+                    <span class="icon">👤</span>
+                    <input type="text" id="username" placeholder="请输入用户名" required autocomplete="username">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">密码</label>
+                <div class="input-wrapper">
+                    <span class="icon">🔒</span>
+                    <input type="password" id="password" placeholder="请输入密码" required autocomplete="current-password">
+                </div>
+            </div>
+
+            <div class="remember-forgot">
+                <label>
+                    <input type="checkbox" id="remember"> 记住我
+                </label>
+                <a href="#" onclick="showHint()">忘记密码？</a>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span class="loading"></span>
+                登 录
+            </button>
+        </form>
+
+        <div class="footer-info">
+            <p>© 2026 校园微农园智能监测系统</p>
+            <div class="hint">
+                默认账号：<code>admin</code><br>
+                默认密码：<code>admin123</code>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 管理员账号配置
+        const ADMIN_ACCOUNTS = [
+            {
+                username: 'admin',
+                password: 'admin123',
+                name: '系统管理员',
+                role: 'admin'
+            },
+            {
+                username: 'manager',
+                password: 'manager123',
+                name: '农场管理员',
+                role: 'manager'
+            }
+        ];
+
+        // 检查是否已登录
+        function checkLogin() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn === 'true') {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 页面加载时检查
+        checkLogin();
+
+        // 处理登录
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // 显示加载状态
+            loginBtn.classList.add('loading-state');
+            loginBtn.disabled = true;
+
+            // 模拟网络延迟
+            setTimeout(() => {
+                // 验证账号密码
+                const user = ADMIN_ACCOUNTS.find(
+                    account => account.username === username && account.password === password
+                );
+
+                if (user) {
+                    // 登录成功
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        username: user.username,
+                        name: user.name,
+                        role: user.role,
+                        loginTime: new Date().toISOString()
+                    }));
+
+                    if (remember) {
+                        localStorage.setItem('rememberedUser', username);
+                    } else {
+                        localStorage.removeItem('rememberedUser');
+                    }
+
+                    // 跳转到主页
+                    window.location.href = 'index.html';
+                } else {
+                    // 登录失败
+                    errorMessage.classList.add('show');
+                    document.getElementById('errorText').textContent = '用户名或密码错误，请重试';
+
+                    // 清空密码框
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+
+                    // 抖动效果
+                    const container = document.querySelector('.login-container');
+                    container.style.animation = 'none';
+                    container.offsetHeight; // 触发重绘
+                    container.style.animation = 'shake 0.5s ease';
+                }
+
+                // 恢复按钮状态
+                loginBtn.classList.remove('loading-state');
+                loginBtn.disabled = false;
+            }, 800);
+        }
+
+        // 显示提示
+        function showHint() {
+            alert('默认管理员账号信息：\n\n用户名: admin\n密码: admin123\n\n或\n\n用户名: manager\n密码: manager123');
+        }
+
+        // 页面加载时，如果有记住的用户名则填充
+        window.onload = function() {
+            const rememberedUser = localStorage.getItem('rememberedUser');
+            if (rememberedUser) {
+                document.getElementById('username').value = rememberedUser;
+                document.getElementById('remember').checked = true;
+            }
+        };
+    </script>
+
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</body>
+</html>
